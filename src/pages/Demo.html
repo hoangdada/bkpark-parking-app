@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Bar - Hệ thống Học Code</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        ai: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 h-screen font-sans">
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- 1. KHU VỰC BÊN TRÁI (Thương hiệu) -->
+                <div class="flex items-center shrink-0 cursor-pointer" onclick="window.location.href='#'">
+                    <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center text-xl font-bold shadow-md">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold text-gray-800 tracking-tight hidden sm:block">WorkCoder</span>
+                </div>
+
+                <!-- 2. KHU VỰC Ở GIỮA (Menu điều hướng chính) -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i> Lộ trình học
+                    </a>
+                    <a href="#" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-laptop-code"></i> Môi trường Code
+                    </a>
+                    <a href="#" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-users"></i> Cộng đồng
+                    </a>
+                </div>
+
+                <!-- 3. KHU VỰC BÊN PHẢI (Cá nhân hóa & Gamification) -->
+                <div class="flex items-center space-x-3 sm:space-x-5">
+                    
+                    <!-- Tiến độ & Streak -->
+                    <div class="flex items-center gap-1.5 text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100 shadow-inner cursor-help" title="Chuỗi ngày học: 15 ngày">
+                        <i class="fa-solid fa-fire text-lg animate-pulse"></i>
+                        <span class="font-bold text-sm">15</span>
+                    </div>
+
+                    <!-- Thành tựu & Mascot -->
+                    <div class="hidden sm:flex items-center gap-1.5 text-yellow-500 bg-yellow-50 px-2.5 py-1 rounded-full border border-yellow-100 cursor-pointer hover:bg-yellow-100 transition" title="Điểm thành tựu">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span class="font-bold text-sm text-yellow-700">1,250</span>
+                    </div>
+
+                    <!-- Trợ lý AI -->
+                    <button class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition transform duration-200">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span class="hidden sm:inline">Trợ lý AI</span>
+                    </button>
+
+                    <!-- Avatar / Hồ sơ cá nhân -->
+                    <div class="relative">
+                        <button id="profileBtn" class="flex items-center focus:outline-none">
+                            <img class="h-10 w-10 rounded-full border-2 border-gray-200 hover:border-primary object-cover transition" src="https://api.dicebear.com/9.x/notionists/svg?seed=Felix" alt="User Avatar">
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none origin-top-right transition-all">
+                            <div class="px-4 py-3">
+                                <p class="text-sm text-gray-500">Đăng nhập dưới tên</p>
+                                <p class="text-sm font-medium text-gray-900 truncate">Học viên Trái ngành</p>
+                            </div>
+                            <div class="py-1">
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
+                                    <i class="fa-regular fa-id-card w-5 text-gray-400 group-hover:text-primary"></i> Quản lý hồ sơ
+                                </a>
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
+                                    <i class="fa-solid fa-chart-line w-5 text-gray-400 group-hover:text-primary"></i> Tiến độ học tập
+                                </a>
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-ai">
+                                    <i class="fa-regular fa-calendar-check w-5 text-gray-400 group-hover:text-ai"></i> Lịch học AI (AI Scheduling)
+                                </a>
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
+                                    <i class="fa-solid fa-certificate w-5 text-gray-400 group-hover:text-primary"></i> Chứng chỉ khóa học
+                                </a>
+                            </div>
+                            <div class="py-1">
+                                <a href="#" class="group flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i class="fa-solid fa-arrow-right-from-bracket w-5 text-red-400 group-hover:text-red-600"></i> Cài đặt & Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <div class="md:hidden flex items-center">
+                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <i class="fa-solid fa-bars text-2xl"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Placeholder -->
+    <main class="p-8 max-w-7xl mx-auto flex flex-col items-center justify-center h-[calc(100vh-4rem)] text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Chào mừng đến với Dashboard</h1>
+        <p class="text-gray-500">Hãy nhấn thử vào nút Trợ lý AI hoặc Avatar ở góc phải để xem tương tác.</p>
+    </main>
+
+    <!-- JavaScript xử lý Dropdown -->
+    <script>
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        // Toggle dropdown khi click avatar
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+        });
+
+        // Ẩn dropdown khi click ra ngoài
+        window.addEventListener('click', () => {
+            if (!profileDropdown.classList.contains('hidden')) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+
+        // Ngăn sự kiện click trong menu làm đóng menu
+        profileDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>

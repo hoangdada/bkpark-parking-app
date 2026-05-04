@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+@theme {
+  /* Ghi đè font mặc định (sans) của Tailwind bằng Roboto Condensed */
+  --font-sans: "Roboto Condensed", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Áp dụng font cho toàn bộ trang web */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  table {
+    @apply border border-collapse border-[#ECF0F5];
+  }
+  thead th {
+    @apply bg-[#075385] text-white py-1;
+  }
+  th,td {
+    @apply border border-[#ECF0F5];
+  }
+  td {
+    @apply p-1.5
+  }
+
+  option {
+    @apply hover:bg-[#428bca] hover:text-white font-medium bg-white text-black cursor-pointer
+  }
+
+}
