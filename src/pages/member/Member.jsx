@@ -28,6 +28,8 @@ const Member = () => {
     setTimeout(() => setToast({ visible: false, message: "", type: "success" }), 4000);
   };
 
+  const username = sessionStorage.getItem("sebtl_username") || "User";
+
   // 2. Cài đặt Global Interceptor
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
@@ -129,7 +131,7 @@ const Member = () => {
           <img src={Bycicle_img} alt="somebycicle" className="w-[50px] pl-[10px]"/>
           <div className="flex flex-row items-center gap-2 pr-2">
             <img src={BK_whitebg} className="w-[25px] aspect-square"/>
-            <span className="text-white">Phùng Thanh Độ</span>
+            <span className="text-white">{username}</span>
             <img src={vnflag} className="w-[20px]" />
             <img src={ukflag} className="w-[20px]"/>
           </div>
@@ -143,7 +145,7 @@ const Member = () => {
             {/**user and role info */}
             <img src={user_icon} className="aspect-square h-full"/>
             <div className="flex flex-col gap-0.5 mt-1">
-              <span className="text-white font-bold leading-5">Phùng Thanh Độ</span>
+              <span className="text-white font-bold leading-5">{username}</span>
               <div className="flex flex-row gap-1 h-[30px] items-center">
                 <div className="w-[10px] h-[10px]  bg-green-400 rounded-[9999px]"></div>
                 <div className="w-px h-7/10 bg-white"></div>
@@ -263,22 +265,25 @@ const Member = () => {
                 <tr>
                   <th className="w-[200px]">Action</th>
                   <th>Status</th>
-                  <th>Date</th>
-                  <th>Total amount</th>
-                  <th>Payment ID</th>
+                  <th>Last Updated</th>
+                  <th>Total Amount</th>
+                  <th>Month</th>
+                  <th>Bill ID</th>
                 </tr>
               </thead>
               <tbody id="payment-body">
                 {payment.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="text-center">No payment history found.</td>
+                    {/* Sửa colSpan từ 5 thành 6 cho khớp với số lượng cột mới */}
+                    <td colSpan="6" className="text-center">No payment history found.</td>
                   </tr>
                 ) : (
                   payment.map((bill) => (
                     <tr key={bill.billId} >
 
+                      {/* 1. Action */}
                       <td className="flex justify-center">
-                        {bill.status != "UNPAID" ? (
+                        {bill.status !== "UNPAID" ? (
                           <span className="text-black/20">nothing</span>
                         ) : (
                           <span 
@@ -290,25 +295,33 @@ const Member = () => {
                         )}
                       </td>
 
-                      {/* 1. Status: Kiểm tra finished để hiển thị trạng thái */}
+                      {/* 2. Status */}
                       <td>
-                        {bill.status != "UNPAID" ? (
+                        {bill.status !== "UNPAID" ? (
                           <span className="text-gray-600 font-bold">PAID</span>
                         ) : (
                           <span className="text-orange-600 font-bold">UNPAID</span>
                         )}
                       </td>
 
+                      {/* 3. Last Updated - Giả định key từ backend trả về là updatedAt. Bạn có thể đổi lại nếu BE dùng tên khác như lastUpdated */}
                       <td>
-                        {bill.billingMonth}
+                         {bill.lastUpdated ? new Date(bill.lastUpdated).toLocaleString() : "-"}
                       </td>
 
+                      {/* 4. Total Amount */}
                       <td>
                         {bill.amount}
                       </td>
 
+                      {/* 5. Month */}
                       <td>
-                        {bill.billId}
+                        {bill.billingMonth}
+                      </td>
+
+                      {/* 6. Bill ID */}
+                      <td>
+                        #{bill.billId}
                       </td>
 
                     </tr>
@@ -317,7 +330,7 @@ const Member = () => {
               </tbody>
             </table>
           </div>
-          }  
+          }
 
           <div className="h-[20px] w-[calc(100%+16px)] bg-white -ml-[16px] text-[10px] items-center justify-between flex pl-1">
             <span>Copyright © 2026 -<span className="text-blue-500"> Software Engineer</span> . All rights reserved.</span>

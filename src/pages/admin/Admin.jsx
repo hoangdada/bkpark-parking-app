@@ -194,6 +194,8 @@ const Admin = () => {
   // 1. Thêm State cho Toast thông báo
   const [toast, setToast] = useState({ visible: false, message: "", type: "success" });
 
+  const username = sessionStorage.getItem("sebtl_username") || "User";
+
   const showToast = (message, type = "error") => {
     setToast({ visible: true, message, type });
     setTimeout(() => setToast({ visible: false, message: "", type: "success" }), 4000);
@@ -391,7 +393,7 @@ const Admin = () => {
           <img src={Bycicle_img} alt="somebycicle" className="w-[50px] pl-[10px]"/>
           <div className="flex flex-row items-center gap-2 pr-2">
             <img src={BK_whitebg} className="w-[25px] aspect-square"/>
-            <span className="text-white">Lương Thế Hoàng</span>
+            <span className="text-white">{username}</span>
             <img src={vnflag} className="w-[20px]" />
             <img src={ukflag} className="w-[20px]"/>
           </div>
@@ -405,7 +407,7 @@ const Admin = () => {
             {/**user and role info */}
             <img src={user_icon} className="aspect-square h-full"/>
             <div className="flex flex-col gap-0.5 mt-1">
-              <span className="text-white font-bold leading-5">LƯƠNG THẾ HOÀNG</span>
+              <span className="text-white font-bold leading-5">{username}</span>
               <div className="flex flex-row gap-1 h-[30px] items-center">
                 <div className="w-[10px] h-[10px]  bg-green-400 rounded-[9999px]"></div>
                 <div className="w-px h-7/10 bg-white"></div>
@@ -434,7 +436,7 @@ const Admin = () => {
 
             <div
               onClick={() => setActiveTab("SLOT")}
-              className={`flex flex-row items-center justify-around gap-12 cursor-pointer ${activeTab == "PAYMENT" ? "bg-[#151c1e]" : "hover:bg-[#151c1e]"}  py-2.5 group`}
+              className={`flex flex-row items-center justify-around gap-12 cursor-pointer ${activeTab == "SLOT" ? "bg-[#151c1e]" : "hover:bg-[#151c1e]"}  py-2.5 group`}
             >
               <div className="flex flex-row items-center gap-2">
                 <img src={option_icon} />

@@ -1,7 +1,7 @@
 import BachKhoa_image from '../../assets/bk_name_vi.png';
 import Bycicle_img from '../../assets/bycicle.svg';
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -11,7 +11,27 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e) => {
+  // State kiểm tra trạng thái server
+  const [isBackendDown, setIsBackendDown] = useState(false);
+
+// Ping server ngay khi load trang
+  useEffect(() => {
+    const checkBackendStatus = async () => {
+      try {
+        // SỬA GET THÀNH POST VỚI BODY TRỐNG
+        // Nếu BE sống, nó sẽ ném lỗi 400/401 đàng hoàng (có CORS) -> Không nhảy vào ERR_NETWORK
+        await axios.post("http://localhost:18080/auth/login", {});
+      } catch (error) {
+        // Chỉ khi sập BE thật (hoặc tắt server) thì mới ra đúng mã ERR_NETWORK
+        if (error.code === 'ERR_NETWORK') {
+          setIsBackendDown(true);
+        }
+      }
+    };
+    checkBackendStatus();
+  }, []);
+
+const handleLogin = async (e) => {
     console.log("teeeee"); // test thui
     e.preventDefault();
     setShowError(false); // Reset thông báo lỗi mỗi lần nhấn Submit lại
@@ -31,20 +51,35 @@ const Login = () => {
         // LƯU VÀO SESSION STORAGE (Khớp hoàn toàn với logic auth.html của bạn)
         sessionStorage.setItem("sebtl_token", data.token);
         sessionStorage.setItem("sebtl_role", data.role);
+        sessionStorage.setItem("sebtl_username", data.name);
 
         // Điều hướng dựa trên Role trả về từ Backend
-        // Chúng ta chuyển role về chữ thường để khớp với định nghĩa Route (ví dụ: /admin, /member)
         const targetPath = `/${data.role.toLowerCase()}`;
         
         console.log("Đang điều hướng tới:", targetPath);
         navigate(targetPath);
       }
     } catch (error) {
-      // Nếu có lỗi (Sai pass, user không tồn tại, hoặc lỗi server)
+      // Bắt chuẩn lỗi mất kết nối
+      if (error.code === 'ERR_NETWORK') {
+        setIsBackendDown(true);
+        return;
+      }
+      
+      // Nếu có lỗi (Sai pass, user không tồn tại)
       console.error("Lỗi đăng nhập:", error);
-      setShowError(true); // Kích hoạt hiển thị dòng chữ "Invalid credentials"
+      setShowError(true); 
     }
   };
+
+  // NẾU SERVER SẬP -> Trả về màn hình trắng tinh, chữ đỏ căn giữa (Không load UI Login)
+  if (isBackendDown) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen bg-white">
+        <span className="text-red-600 font-bold text-4xl">Backend not respond</span>
+      </div>
+    );
+  }
 
   return (
     <div className='flex flex-col bg-white min-h-screen'>
@@ -109,9 +144,15 @@ const Login = () => {
                       value="Submit" 
                       className='cursor-pointer bg-[#0760BA] text-white font-semibold px-4 py-1 rounded-[6px] hover:bg-[#03386d]'/>
                     <input 
-                      type="reset" 
+                      type="button" 
                       value="Reset" 
-                      className='cursor-pointer bg-[#0760BA] text-white font-semibold px-4 py-1 rounded-[6px] hover:bg-[#03386d]'/>
+                      onClick={() => {
+                        setUsername(""); // Xóa trắng ô username
+                        setPassword(""); // Xóa trắng ô password
+                        setShowError(false); // Ẩn luôn dòng báo lỗi (nếu đang hiện)
+                      }}
+                      className='cursor-pointer bg-[#0760BA] text-white font-semibold px-4 py-1 rounded-[6px] hover:bg-[#03386d]'
+                    />
                   </div>
                 </form>
 
