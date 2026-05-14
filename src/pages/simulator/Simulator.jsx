@@ -35,9 +35,63 @@ const parseRangeString = (input) => {
   return Array.from(ids);
 };
 
+const parseSlotInput = (value) => {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+
+  const letterMatch = trimmed.match(/^([A-Ea-e])\s*(\d{1,2})$/);
+  if (letterMatch) {
+    const zoneLetter = letterMatch[1].toUpperCase();
+    const slotIndex = parseInt(letterMatch[2], 10);
+    if (slotIndex >= 1 && slotIndex <= 48) {
+      const zoneOffset = { A: 0, B: 48, C: 96, D: 144, E: 192 }[zoneLetter] || 0;
+      return String(zoneOffset + slotIndex);
+    }
+  }
+
+  const numeric = trimmed.match(/^\d+$/);
+  return numeric ? trimmed : "";
+};
+
+const convertSlotId = (slotId) => {
+  const numericId = parseInt(String(slotId || "").trim(), 10);
+  if (Number.isNaN(numericId) || numericId < 1 || numericId > 240) {
+    return String(slotId || "");
+  }
+
+  const zones = [
+    { letter: "A", start: 1, end: 48 },
+    { letter: "B", start: 49, end: 96 },
+    { letter: "C", start: 97, end: 144 },
+    { letter: "D", start: 145, end: 192 },
+    { letter: "E", start: 193, end: 240 },
+  ];
+
+  const zone = zones.find((z) => numericId >= z.start && numericId <= z.end);
+  if (!zone) return String(slotId || "");
+
+  const index = numericId - zone.start + 1;
+  return `${zone.letter}${index}`;
+};
+
 const stableStringify = (value) => {
+  const normalize = (input) => {
+    if (Array.isArray(input)) {
+      return input.map((item) => normalize(item));
+    }
+    if (input && typeof input === "object") {
+      return Object.keys(input)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = normalize(input[key]);
+          return acc;
+        }, {});
+    }
+    return input;
+  };
+
   try {
-    return JSON.stringify(value, Object.keys(value || {}).sort());
+    return JSON.stringify(normalize(value));
   } catch (error) {
     return "";
   }
@@ -132,6 +186,9 @@ const SeatMap = ({ slotsData }) => {
           <div>
             <ParkingZone zoneLetter="D" startId={145} slotsData={slotsData} />
             <ParkingZone zoneLetter="E" startId={193} slotsData={slotsData} />
+            <span className="text-[20px] text-black mt-2 italic">
+                *Guide: A(1-48). B(49-96). C(97-144). D(145-192). E(193-240)
+              </span>
           </div>
 
           <div className="flex flex-row gap-10">
@@ -409,11 +466,13 @@ const Simulator = () => {
       
       // #5 Auto-fill the Arrival Slot Input
       if (response.data && response.data.slotId) {
-        setArrivalSlotId(String(response.data.slotId));
+        // Convert slotId to A1-E48 format for better UX
+        const formattedSlotId = convertSlotId(response.data.slotId);
+        setArrivalSlotId(formattedSlotId);
       }
 
       fetchAllStatus(false);
-      [1000, 4000, 7000].forEach((delay) => {
+      [50, 100, 150].forEach((delay) => {
         setTimeout(() => fetchAllStatus(false), delay);
       });
     } catch (error) {
@@ -423,7 +482,7 @@ const Simulator = () => {
   };
 
   const handleCarDeparture = async () => {
-    const targetSlot = departureSlotId.trim();
+    const targetSlot = parseSlotInput(departureSlotId);
     if (!targetSlot) {
       showToast("Slot ID is required for departure.");
       return;
@@ -456,7 +515,7 @@ const Simulator = () => {
   };
 
   const handleCarArrival = async () => {
-    const targetSlot = arrivalSlotId.trim();
+    const targetSlot = parseSlotInput(arrivalSlotId);
     if (!targetSlot) {
       showToast("Slot ID is required for arrival.");
       return;
@@ -466,6 +525,7 @@ const Simulator = () => {
       params: { slotId: targetSlot },
     });
     showToast("Car arrival simulated.", "success");
+    setArrivalSlotId(targetSlot);
     fetchAllStatus(false);
   };
 
@@ -521,12 +581,12 @@ const Simulator = () => {
     } catch (e) {}
   };
 
-  const handleSensorFailure = async () => {
-    if (!sensorFailId.trim()) return showToast("Slot ID is required.");
-    await axios.post(`${SIM_BASE}/sensor-failure`, null, { headers: authHeaders(), params: { slotId: sensorFailId.trim() } });
-    showToast("Sensor failure injected.", "success");
-    fetchAllStatus(false);
-  };
+  // const handleSensorFailure = async () => {
+  //   if (!sensorFailId.trim()) return showToast("Slot ID is required.");
+  //   await axios.post(`${SIM_BASE}/sensor-failure`, null, { headers: authHeaders(), params: { slotId: sensorFailId.trim() } });
+  //   showToast("Sensor failure injected.", "success");
+  //   fetchAllStatus(false);
+  // };
 
   const handleSensorFailureBulk = async () => {
     const ids = parseRangeString(sensorFailBulk);
@@ -536,12 +596,12 @@ const Simulator = () => {
     fetchAllStatus(false);
   };
 
-  const handleSensorFix = async () => {
-    if (!sensorFixId.trim()) return showToast("Slot ID is required.");
-    await axios.post(`${SIM_BASE}/sensor-fix`, null, { headers: authHeaders(), params: { slotId: sensorFixId.trim() } });
-    showToast("Sensor fixed.", "success");
-    fetchAllStatus(false);
-  };
+  // const handleSensorFix = async () => {
+  //   if (!sensorFixId.trim()) return showToast("Slot ID is required.");
+  //   await axios.post(`${SIM_BASE}/sensor-fix`, null, { headers: authHeaders(), params: { slotId: sensorFixId.trim() } });
+  //   showToast("Sensor fixed.", "success");
+  //   fetchAllStatus(false);
+  // };
 
   const handleSensorFixBulk = async () => {
     const ids = parseRangeString(sensorFixBulk);
@@ -781,7 +841,7 @@ const Simulator = () => {
                 <div className="flex flex-row gap-2">
                   <input
                     type="text"
-                    placeholder="Slot ID"
+                    placeholder="Slot ID (e.g. A3 or 3)"
                     id="arrivalSlotId"
                     className="border-[1.5px] border-gray-300 rounded px-2 text-sm w-[160px] outline-none focus:border-[#3C8DBC]"
                     value={arrivalSlotId}
@@ -801,7 +861,7 @@ const Simulator = () => {
                 <div className="flex flex-row gap-2">
                   <input
                     type="text"
-                    placeholder="Slot ID"
+                    placeholder="Slot ID (e.g. A3 or 3)"
                     id="departureSlotId"
                     className="border-[1.5px] border-gray-300 rounded px-2 text-sm w-[160px] outline-none focus:border-[#3C8DBC]"
                     value={departureSlotId}
@@ -820,7 +880,7 @@ const Simulator = () => {
 
             <div className="flex flex-col bg-white drop-shadow-xl/20 border-t-[#3C8DBC] border-t-[4px] rounded-[5px] px-4 py-3 gap-3">
               <span className="text-[#0e4360] text-[22px] font-medium">Sensor failures</span>
-              <div className="flex flex-col gap-2">
+              {/* <div className="flex flex-col gap-2">
                 <span className="text-sm font-semibold text-black/70">Single sensor</span>
                 <div className="flex flex-row gap-2">
                   <input
@@ -850,7 +910,7 @@ const Simulator = () => {
                     Fix sensor
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-semibold text-black/70">Bulk sensors</span>
